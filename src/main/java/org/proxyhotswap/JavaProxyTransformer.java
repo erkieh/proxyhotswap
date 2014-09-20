@@ -12,13 +12,14 @@ import java.security.ProtectionDomain;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javassist.CannotCompileException;
-import javassist.ClassPool;
-import javassist.CtClass;
-import javassist.CtConstructor;
-import javassist.CtMethod;
-import javassist.Modifier;
-import javassist.NotFoundException;
+import org.proxyhotswap.javassist.CannotCompileException;
+import org.proxyhotswap.javassist.ClassPool;
+import org.proxyhotswap.javassist.CtClass;
+import org.proxyhotswap.javassist.CtConstructor;
+import org.proxyhotswap.javassist.CtMethod;
+import org.proxyhotswap.javassist.Modifier;
+import org.proxyhotswap.javassist.NotFoundException;
+
 import sun.misc.ProxyGenerator;
 
 /**
