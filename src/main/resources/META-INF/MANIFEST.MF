@@ -1,4 +1,4 @@
 Manifest-Version: 1.0
 Can-Redefine-Classes: true
-Agent-Class: org.proxyhotswap.JavaProxyHotswapAgent
-Premain-Class: org.proxyhotswap.JavaProxyHotswapAgent
+Agent-Class: io.github.proxyhotswap.JavaProxyHotswapAgent
+Premain-Class: io.github.proxyhotswap.JavaProxyHotswapAgent
