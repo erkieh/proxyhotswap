@@ -28,7 +28,6 @@ public class EnhancerTransformer implements ClassFileTransformer {
 	
 	private Instrumentation inst;
 	private static Map<String, GeneratorParams> generatorParams = new ConcurrentHashMap<>();
-	private static Map<Class<?>, Method> generatorMethod = new ConcurrentHashMap<>();
 	private static Map<Class<?>, TransformationState> transformationStates = new ConcurrentHashMap<>();
 	
 	public EnhancerTransformer(Instrumentation inst) {
@@ -138,6 +137,7 @@ public class EnhancerTransformer implements ClassFileTransformer {
 		CtClass cc = classPool.makeClass(new ByteArrayInputStream(classfileBuffer));
 		CtClass[] interfaces = cc.getInterfaces();
 		for (CtClass class1 : interfaces) {
+			// We use strings because some libraries repackage cglib to a different namespace to avoid conflicts.
 			if (class1.getSimpleName().contains("GeneratorStrategy")) {
 				CtMethod[] declaredMethods = class1.getMethods();
 				for (CtMethod method : declaredMethods) {
