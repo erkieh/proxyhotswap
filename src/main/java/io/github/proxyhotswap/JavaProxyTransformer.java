@@ -30,10 +30,6 @@ public class JavaProxyTransformer implements ClassFileTransformer {
 	private static final String STATIC_INIT_METHOD_NAME = "redefinedJavaProxyExplicitInitMethodAddedByJavaAgent";
 	private static final ClassPool classPool = ClassPool.getDefault();
 	
-	private enum TransformationState {
-		NEW, WAITING, REDEFINED
-	}
-	
 	private Instrumentation inst;
 	private static Map<Class<?>, TransformationState> transformationStates = new ConcurrentHashMap<>();
 	
@@ -64,39 +60,31 @@ public class JavaProxyTransformer implements ClassFileTransformer {
 				case REDEFINED:
 					return initNewProxy(classBeingRedefined);
 				default:
-					throw new RuntimeException("This line should not have been reached!");
+					throw new RuntimeException("Unhandeled TransformationState!");
 			}
 		} catch (Exception e) {
 			transformationStates.remove(classBeingRedefined);
-			throw e;
+			throw new RuntimeException(e);
 		}
 	}
 	
 	private byte[] redefineProxy(ClassLoader loader, String className, final Class<?> classBeingRedefined,
-			final byte[] classfileBuffer) {
+			final byte[] classfileBuffer) throws IOException, CannotCompileException, NotFoundException {
 		byte[] result = classfileBuffer;
-		try {
-			result = generateNewProxyClass(loader, className, classBeingRedefined);
-			transformationStates.put(classBeingRedefined, TransformationState.REDEFINED);
-			// We can't call our created static init method in this event, because we can't see the changes in
-			// the class definitons. Schedule a new redefinition event where we won't change anything, just call
-			// our init method
-			scheduleRedefinition(classBeingRedefined, result);
-		} catch (IOException | CannotCompileException | NotFoundException e) {
-			throw new RuntimeException(e);
-		}
+		result = generateNewProxyClass(loader, className, classBeingRedefined);
+		transformationStates.put(classBeingRedefined, TransformationState.REDEFINED);
+		// We can't call our created static init method in this event, because we can't see the changes in
+		// the class definitons. Schedule a new redefinition event where we won't change anything, just call
+		// our init method
+		scheduleRedefinition(classBeingRedefined, result);
 		return result;
 	}
 	
-	private byte[] initNewProxy(final Class<?> classBeingRedefined) {
-		try {
-			classBeingRedefined.getMethod(STATIC_INIT_METHOD_NAME).invoke(null);
-			transformationStates.remove(classBeingRedefined);
-			// System.out.println("redefined " + classBeingRedefined.getName());
-		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException
-				| SecurityException e) {
-			throw new RuntimeException(e);
-		}
+	private byte[] initNewProxy(final Class<?> classBeingRedefined) throws IllegalAccessException,
+			IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
+		classBeingRedefined.getMethod(STATIC_INIT_METHOD_NAME).invoke(null);
+		transformationStates.remove(classBeingRedefined);
+		// System.out.println("redefined " + classBeingRedefined.getName());
 		return null;
 	}
 	
