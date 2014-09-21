@@ -56,7 +56,7 @@ public class HotSwapTestHelper {
 		
 		// allow time for multiple redefinitions
 		try {
-			Thread.sleep(100);
+			Thread.sleep(150);
 		} catch (InterruptedException e) {
 			throw new RuntimeException(e);
 		}
