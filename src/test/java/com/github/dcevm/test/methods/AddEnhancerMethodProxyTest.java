@@ -11,6 +11,7 @@ import java.lang.reflect.Method;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.cglib.proxy.Callback;
 import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.cglib.proxy.MethodInterceptor;
 import org.springframework.cglib.proxy.MethodProxy;
@@ -76,16 +77,16 @@ public class AddEnhancerMethodProxyTest {
 	}
 	
 	public static class SerializableNoOp implements Serializable, MethodInterceptor {
-		private Enhancer target;
-		
-		public SerializableNoOp(Enhancer target) {
-			this.target = target;
-		}
+		private int count;
 		
 		@Override
 		public Object intercept(Object proxy, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
-			System.out.println("interceptor");
+			count++;
 			return method.invoke(new AImpl(), args);
+		}
+		
+		public int getInvocationCount() {
+			return count;
 		}
 	}
 	
@@ -95,28 +96,25 @@ public class AddEnhancerMethodProxyTest {
 		
 		assert __version__() == 0;
 		
-		final A a = createEnhancer();
+		SerializableNoOp cb = new SerializableNoOp();
+		final A a = createEnhancer(cb);
 		
+		assertEquals(0, cb.getInvocationCount());
 		assertEquals(1, a.getValue1());
+		assertEquals(1, cb.getInvocationCount());
 		
 		__toVersion__(1);
 		Method method = getMethod(a, "getValue2");
 		assertEquals("getValue2", method.getName());
 		assertEquals(2, method.invoke(a, null));
+		assertEquals(2, cb.getInvocationCount());
 	}
 	
-	private A createEnhancer() {
+	private A createEnhancer(Callback cb) {
 		Enhancer enhancer = new Enhancer();
 		enhancer.setSuperclass(AImpl.class);
-		// CGLIB$CALLBACK_0 CglibAopProxy$DynamicAdvisedInterceptor (id=3799)
-		// CGLIB$CALLBACK_1 CglibAopProxy$StaticUnadvisedInterceptor (id=3800)
-		// CGLIB$CALLBACK_2 CglibAopProxy$SerializableNoOp (id=3801)
-		// CGLIB$CALLBACK_3 CglibAopProxy$StaticDispatcher (id=3802)
-		// CGLIB$CALLBACK_4 CglibAopProxy$AdvisedDispatcher (id=3803)
-		// CGLIB$CALLBACK_5 CglibAopProxy$EqualsInterceptor (id=3804)
-		// CGLIB$CALLBACK_6 CglibAopProxy$HashCodeInterceptor (id=3808)
 		
-		enhancer.setCallback(new SerializableNoOp(enhancer));
+		enhancer.setCallback(cb);
 		final A a = (A) enhancer.create();
 		return a;
 	}
@@ -125,16 +123,20 @@ public class AddEnhancerMethodProxyTest {
 	public void accessNewMethodOnProxyCreatedAfterSwap() throws IllegalAccessException, IllegalArgumentException,
 			InvocationTargetException, IOException {
 		assert __version__() == 0;
-		A a = createEnhancer();
+		SerializableNoOp cb = new SerializableNoOp();
+		A a = createEnhancer(cb);
 		
+		assertEquals(0, cb.getInvocationCount());
 		assertEquals(1, a.getValue1());
+		assertEquals(1, cb.getInvocationCount());
 		__toVersion__(1);
 		
-		a = createEnhancer();
+		a = createEnhancer(cb);
 		
 		Method method = getMethod(a, "getValue2");
 		assertEquals("getValue2", method.getName());
 		assertEquals(2, method.invoke(a, null));
+		assertEquals(2, cb.getInvocationCount());
 	}
 	
 	private Method getMethod(Object a, String methodName) {
