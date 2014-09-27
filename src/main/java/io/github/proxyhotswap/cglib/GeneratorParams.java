@@ -1,8 +1,9 @@
+package io.github.proxyhotswap.cglib;
+
 /**
+ * @author Erki Ehtla
  * 
  */
-package io.github.proxyhotswap;
-
 public class GeneratorParams {
 	public GeneratorParams(Object generator, Object params) {
 		super();
