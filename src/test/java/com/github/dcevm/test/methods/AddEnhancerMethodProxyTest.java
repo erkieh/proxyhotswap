@@ -45,6 +45,13 @@ public class AddEnhancerMethodProxyTest {
 		}
 	}
 	
+	// Version 1
+	public static class AImpl___2 implements A___2 {
+		public int getValue3() {
+			return 3;
+		}
+	}
+	
 	// Version 0
 	public interface A {
 		public int getValue1();
@@ -53,6 +60,11 @@ public class AddEnhancerMethodProxyTest {
 	// Version 1
 	public interface A___1 {
 		public int getValue2();
+	}
+	
+	// Version 1
+	public interface A___2 {
+		public int getValue3();
 	}
 	
 	@Before
@@ -108,6 +120,12 @@ public class AddEnhancerMethodProxyTest {
 		assertEquals("getValue2", method.getName());
 		assertEquals(2, method.invoke(a, null));
 		assertEquals(2, cb.getInvocationCount());
+		
+		__toVersion__(2);
+		method = getMethod(a, "getValue3");
+		assertEquals("getValue3", method.getName());
+		assertEquals(3, method.invoke(a, null));
+		assertEquals(3, cb.getInvocationCount());
 	}
 	
 	private A createEnhancer(Callback cb) {
