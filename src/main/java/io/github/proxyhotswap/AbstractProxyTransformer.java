@@ -15,7 +15,6 @@ import java.lang.instrument.UnmodifiableClassException;
 import java.security.ProtectionDomain;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author Erki Ehtla
@@ -27,7 +26,6 @@ public abstract class AbstractProxyTransformer implements ClassFileTransformer {
 	
 	protected Instrumentation inst;
 	protected Map<Class<?>, TransformationState> transformationStates;
-	protected Map<Class<?>, Long> transStart = new ConcurrentHashMap<Class<?>, Long>();
 	
 	public AbstractProxyTransformer(Instrumentation inst, Map<Class<?>, TransformationState> transformationStates) {
 		this.inst = inst;
@@ -71,7 +69,6 @@ public abstract class AbstractProxyTransformer implements ClassFileTransformer {
 				if (!isTransformingNeeded(classBeingRedefined)) {
 					return null;
 				}
-				transStart.put(classBeingRedefined, System.currentTimeMillis());
 				setClassAsWaiting(classBeingRedefined);
 				// We can't do the transformation in this event, because we can't see the changes in the class
 				// definitons. Schedule a new redefinition event.
@@ -79,7 +76,6 @@ public abstract class AbstractProxyTransformer implements ClassFileTransformer {
 				return null;
 			case WAITING:
 				removeClassState(classBeingRedefined);
-				System.out.println(System.currentTimeMillis() - transStart.get(classBeingRedefined));
 				return generateNewProxyClass(loader, className, classBeingRedefined);
 			default:
 				throw new RuntimeException("Unhandeled TransformationState!");
