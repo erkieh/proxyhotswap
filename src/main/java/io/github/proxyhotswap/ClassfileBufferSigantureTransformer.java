@@ -32,9 +32,9 @@ public class ClassfileBufferSigantureTransformer implements ClassFileTransformer
 			cc = classPool.makeClass(new ByteArrayInputStream(classfileBuffer));
 			classSignatures.put(classBeingRedefined.getName(), getSignature(cc));
 		} catch (IOException | RuntimeException e) {
-			TranformationUtils.logError(e);
+			TransformationUtils.logError(e);
 		} finally {
-			TranformationUtils.detachCtClass(cc);
+			TransformationUtils.detachCtClass(cc);
 		}
 		return null;
 	}

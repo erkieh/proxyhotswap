@@ -42,7 +42,7 @@ public abstract class AbstractProxyTransformer implements ClassFileTransformer {
 			return transformRedefine(loader, className, classBeingRedefined, protectionDomain, classfileBuffer);
 		} catch (Exception e) {
 			removeClassState(classBeingRedefined);
-			TranformationUtils.logError(e);
+			TransformationUtils.logError(e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -97,9 +97,12 @@ public abstract class AbstractProxyTransformer implements ClassFileTransformer {
 			
 			addInitCallToMethods(cc, initFieldName, method);
 			
+			System.out.println("writing");
+			cc.writeFile("C:\\Users\\Juhtla\\Desktop\\");
+			System.out.println("written " + cc.getName());
 			return cc.toBytecode();
 		} finally {
-			TranformationUtils.detachCtClass(cc);
+			TransformationUtils.detachCtClass(cc);
 		}
 	}
 	
@@ -123,7 +126,7 @@ public abstract class AbstractProxyTransformer implements ClassFileTransformer {
 		CtMethod[] methods = cc.getDeclaredMethods();
 		for (CtMethod ctMethod : methods) {
 			if (!ctMethod.isEmpty() && !Modifier.isStatic(ctMethod.getModifiers())) {
-				ctMethod.insertBefore("if(!" + clinitFieldName + "){" + initCall + "}");
+				ctMethod.insertBefore("if(true){" + initCall + "}");
 			}
 		}
 	}

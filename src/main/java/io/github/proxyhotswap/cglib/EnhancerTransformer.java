@@ -28,17 +28,39 @@ public class EnhancerTransformer extends AbstractProxyTransformer {
 	@Override
 	protected String getInitCall(CtClass cc, String random) throws Exception {
 		CtMethod[] methods = cc.getDeclaredMethods();
-		CtMethod staticHookMethod = null;
+		StringBuilder strB = new StringBuilder();
 		for (CtMethod ctMethod : methods) {
 			if (ctMethod.getName().startsWith("CGLIB$STATICHOOK")) {
 				ctMethod.insertAfter(INIT_FIELD_PREFIX + random + "=true;");
-				staticHookMethod = ctMethod;
+				strB.insert(0, ctMethod.getName() + "();");
+				break;
 			}
 		}
 		
-		if (staticHookMethod == null)
+		if (strB.length() == 0)
 			throw new RuntimeException("Could not find CGLIB$STATICHOOK method");
-		return staticHookMethod.getName() + "();CGLIB$BIND_CALLBACKS(this);";
+		return strB.toString() + ";CGLIB$BIND_CALLBACKS(this);System.out.println(\"initenhancer " + strB.toString()
+				+ "\");" + getClass().getName() + ".write(this);";
+	}
+	
+	public static void write(Object classs) {
+		// final String name = classs.getClass().getName();
+		// new Thread() {
+		// @Override
+		// public void run() {
+		// CtClass cc = classPool.makeClass(name);
+		// try {
+		// System.out.println("writing");
+		// cc.writeFile("C:\\Users\\Juhtla\\Desktop\\");
+		// System.out.println("written");
+		// } catch (CannotCompileException | IOException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// } finally {
+		// TransformationUtils.detachCtClass(cc);
+		// }
+		// }
+		// }.start();
 	}
 	
 	@Override
@@ -52,7 +74,8 @@ public class EnhancerTransformer extends AbstractProxyTransformer {
 		if (genMethod == null)
 			throw new RuntimeException("No generation Method found for redefinition!");
 		
-		return (byte[]) genMethod.invoke(param.getGenerator(), param.getParam());
+		byte[] invoke = (byte[]) genMethod.invoke(param.getGenerator(), param.getParam());
+		return invoke;
 	}
 	
 	private Method getGenerateMethod(Object generator) {

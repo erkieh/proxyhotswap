@@ -1,6 +1,6 @@
 package io.github.proxyhotswap.cglib;
 
-import io.github.proxyhotswap.TranformationUtils;
+import io.github.proxyhotswap.TransformationUtils;
 import io.github.proxyhotswap.javassist.CannotCompileException;
 import io.github.proxyhotswap.javassist.ClassPool;
 import io.github.proxyhotswap.javassist.CtClass;
@@ -44,7 +44,7 @@ public class GeneratorSpyTransformer implements ClassFileTransformer {
 				}
 			}
 		} catch (IOException | RuntimeException | NotFoundException | CannotCompileException e) {
-			TranformationUtils.logError(e);
+			TransformationUtils.logError(e);
 		}
 		return null;
 	}
@@ -55,9 +55,9 @@ public class GeneratorSpyTransformer implements ClassFileTransformer {
 			cc = classPool.makeClass(new ByteArrayInputStream(bytes));
 			generatorParams.put(cc.getName(), new GeneratorParams(generatorStrategy, classGenerator));
 		} catch (IOException | RuntimeException e) {
-			TranformationUtils.logError(e);
+			TransformationUtils.logError(e);
 		} finally {
-			TranformationUtils.detachCtClass(cc);
+			TransformationUtils.detachCtClass(cc);
 		}
 	}
 	
@@ -69,7 +69,7 @@ public class GeneratorSpyTransformer implements ClassFileTransformer {
 			declaredMethod.insertAfter(getClass().getName() + ".register($0, $1, $_);");
 			return cc2.toBytecode();
 		} finally {
-			TranformationUtils.detachCtClass(cc2);
+			TransformationUtils.detachCtClass(cc2);
 		}
 	}
 	

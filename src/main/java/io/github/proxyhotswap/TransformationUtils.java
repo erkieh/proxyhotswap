@@ -6,13 +6,13 @@ import io.github.proxyhotswap.javassist.CtClass;
  * @author Erki Ehtla
  * 
  */
-public class TranformationUtils {
+public class TransformationUtils {
 	public static void detachCtClass(CtClass cc) {
 		if (cc != null) {
 			try {
 				cc.detach();
 			} catch (Exception e) {
-				TranformationUtils.logError(e);
+				TransformationUtils.logError(e);
 			}
 		}
 	}
