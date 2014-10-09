@@ -73,9 +73,6 @@ public class GeneratorSpyTransformer implements ClassFileTransformer {
 		}
 	}
 	
-	/**
-	 * @return the gENERATOR_PARAMS
-	 */
 	public static Map<String, GeneratorParams> getGeneratorParams() {
 		return generatorParams;
 	}

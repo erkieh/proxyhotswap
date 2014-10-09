@@ -73,6 +73,18 @@ public class ClassfileBufferSigantureTransformer implements ClassFileTransformer
 		return !getSignature(clazz).equals(classString);
 	}
 	
+	public static boolean hasSuperClassOrInterfaceChanged(Class<?> clazz1) {
+		Class<?> superclass = clazz1.getSuperclass();
+		if (superclass != null && ClassfileBufferSigantureTransformer.hasClassChanged(superclass))
+			return true;
+		Class<?>[] interfaces = clazz1.getInterfaces();
+		for (Class<?> clazz : interfaces) {
+			if (ClassfileBufferSigantureTransformer.hasClassChanged(clazz))
+				return true;
+		}
+		return false;
+	}
+	
 	private static String getSignature(Class<?> cc) {
 		StringBuilder strBuilder = new StringBuilder();
 		for (Method method : cc.getDeclaredMethods()) {

@@ -126,7 +126,7 @@ public abstract class AbstractProxyTransformer implements ClassFileTransformer {
 		CtMethod[] methods = cc.getDeclaredMethods();
 		for (CtMethod ctMethod : methods) {
 			if (!ctMethod.isEmpty() && !Modifier.isStatic(ctMethod.getModifiers())) {
-				ctMethod.insertBefore("if(true){" + initCall + "}");
+				ctMethod.insertBefore("if(!" + clinitFieldName + "){" + initCall + "}");
 			}
 		}
 	}

@@ -51,15 +51,28 @@ public class HotSwapTestHelper {
 	 * @param versionNumber
 	 *            the target version number
 	 */
-	public static void __toVersion__(int versionNumber, Class<?>... extra) {
+	public static void __toVersion__Delayed(int versionNumber, Class<?>... extra) {
 		HotSwapTool.toVersion(determineOuter(0), versionNumber, extra);
 		
 		// allow time for multiple redefinitions
 		try {
-			Thread.sleep(100);
+			Thread.sleep(300);
 		} catch (InterruptedException e) {
 			throw new RuntimeException(e);
 		}
+	}
+	
+	/**
+	 * Redefines all inner classes of a outer class to a specified version. Inner classes who do not have a particular
+	 * representation for a version remain unchanged.
+	 * <p/>
+	 * Caller class is used as an outer class.
+	 * 
+	 * @param versionNumber
+	 *            the target version number
+	 */
+	public static void __toVersion__(int versionNumber, Class<?>... extra) {
+		HotSwapTool.toVersion(determineOuter(0), versionNumber, extra);
 	}
 	
 	/**

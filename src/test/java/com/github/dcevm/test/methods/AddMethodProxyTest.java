@@ -37,6 +37,16 @@ public class AddMethodProxyTest {
 		public int getValue1() {
 			return 1;
 		}
+		
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see com.github.dcevm.test.methods.AddMethodProxyTest.A#getValue1(java.lang.Object[])
+		 */
+		@Override
+		public int getValue3(Object[] o) {
+			return 1;
+		}
 	}
 	
 	// Version 1
@@ -44,16 +54,25 @@ public class AddMethodProxyTest {
 		public int getValue2() {
 			return 2;
 		}
+		
+		@Override
+		public int getValue33(Object[] o) {
+			return 2;
+		}
 	}
 	
 	// Version 0
 	public interface A {
 		public int getValue1();
+		
+		public int getValue3(Object[] o);
 	}
 	
 	// Version 1
 	public interface A___1 {
 		public int getValue2();
+		
+		public int getValue33(Object[] o);
 	}
 	
 	@Before
@@ -89,9 +108,9 @@ public class AddMethodProxyTest {
 		assertEquals(1, a.getValue1());
 		
 		__toVersion__(1);
-		Method method = getMethod(a, "getValue2");
-		assertEquals("getValue2", method.getName());
-		assertEquals(2, method.invoke(a, null));
+		Method method = getMethod(a, "getValue33");
+		assertEquals("getValue33", method.getName());
+		assertEquals(2, method.invoke(a, new Object[] { new Object[] { new Object() } }));
 	}
 	
 	@Test
