@@ -2,6 +2,7 @@ package io.github.proxyhotswap.cglib;
 
 import io.github.proxyhotswap.AbstractProxyTransformer;
 import io.github.proxyhotswap.TransformationState;
+import io.github.proxyhotswap.TransformationUtils;
 import io.github.proxyhotswap.javassist.CtClass;
 import io.github.proxyhotswap.javassist.CtMethod;
 
@@ -44,7 +45,8 @@ public class EnhancerTransformer extends AbstractProxyTransformer {
 	@Override
 	protected byte[] getNewByteCode(ClassLoader loader, String className, Class<?> classBeingRedefined)
 			throws Exception {
-		GeneratorParams param = GeneratorSpyTransformer.getGeneratorParams().get(className.replaceAll("/", "."));
+		GeneratorParams param = GeneratorSpyTransformer.getGeneratorParams().get(
+				TransformationUtils.getClassName(className));
 		if (param == null)
 			throw new RuntimeException("No Parameters found for redefinition!");
 		
@@ -54,6 +56,12 @@ public class EnhancerTransformer extends AbstractProxyTransformer {
 		
 		byte[] invoke = (byte[]) genMethod.invoke(param.getGenerator(), param.getParam());
 		return invoke;
+	}
+	
+	@Override
+	protected CtClass getCtClass(byte[] newByteCode, String className) throws Exception {
+		// can use get because generator parameter spy has already loaded it to the clas pool
+		return classPool.get(TransformationUtils.getClassName(className));
 	}
 	
 	private Method getGenerateMethod(Object generator) {

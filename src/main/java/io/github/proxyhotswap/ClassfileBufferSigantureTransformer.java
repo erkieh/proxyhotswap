@@ -21,7 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ClassfileBufferSigantureTransformer implements ClassFileTransformer {
 	
 	private static Map<String, String> classSignatures = new ConcurrentHashMap<>();
-	protected static final ClassPool classPool = ClassPool.getDefault();
+	protected static final ClassPool classPool = TransformationUtils.getClassPool();
 	
 	public byte[] transform(ClassLoader loader, String className, final Class<?> classBeingRedefined,
 			ProtectionDomain protectionDomain, final byte[] classfileBuffer) {
@@ -29,12 +29,10 @@ public class ClassfileBufferSigantureTransformer implements ClassFileTransformer
 			return null;
 		CtClass cc = null;
 		try {
-			cc = classPool.makeClass(new ByteArrayInputStream(classfileBuffer));
+			cc = classPool.makeClass(new ByteArrayInputStream(classfileBuffer), false);
 			classSignatures.put(classBeingRedefined.getName(), getSignature(cc));
 		} catch (IOException | RuntimeException e) {
 			TransformationUtils.logError(e);
-		} finally {
-			TransformationUtils.detachCtClass(cc);
 		}
 		return null;
 	}

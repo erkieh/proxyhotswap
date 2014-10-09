@@ -22,7 +22,7 @@ import java.util.UUID;
  */
 public abstract class AbstractProxyTransformer implements ClassFileTransformer {
 	protected static final String INIT_FIELD_PREFIX = "initCalled";
-	protected static final ClassPool classPool = ClassPool.getDefault();
+	protected static final ClassPool classPool = TransformationUtils.getClassPool();
 	
 	protected Instrumentation inst;
 	protected Map<Class<?>, TransformationState> transformationStates;
@@ -87,23 +87,20 @@ public abstract class AbstractProxyTransformer implements ClassFileTransformer {
 		
 		byte[] newByteCode = getNewByteCode(loader, className, classBeingRedefined);
 		
-		CtClass cc = classPool.makeClass(new ByteArrayInputStream(newByteCode));
-		try {
-			String random = generateRandomString();
-			String initFieldName = INIT_FIELD_PREFIX + random;
-			addStaticInitStateField(cc, initFieldName);
-			
-			String method = getInitCall(cc, random);
-			
-			addInitCallToMethods(cc, initFieldName, method);
-			
-			System.out.println("writing");
-			cc.writeFile("C:\\Users\\Juhtla\\Desktop\\");
-			System.out.println("written " + cc.getName());
-			return cc.toBytecode();
-		} finally {
-			TransformationUtils.detachCtClass(cc);
-		}
+		CtClass cc = getCtClass(newByteCode, className);
+		String random = generateRandomString();
+		String initFieldName = INIT_FIELD_PREFIX + random;
+		addStaticInitStateField(cc, initFieldName);
+		
+		String method = getInitCall(cc, random);
+		
+		addInitCallToMethods(cc, initFieldName, method);
+		
+		return cc.toBytecode();
+	}
+	
+	protected CtClass getCtClass(byte[] newByteCode, String className) throws Exception {
+		return classPool.makeClass(new ByteArrayInputStream(newByteCode), false);
 	}
 	
 	protected abstract String getInitCall(CtClass cc, String random) throws Exception;
@@ -159,5 +156,4 @@ public abstract class AbstractProxyTransformer implements ClassFileTransformer {
 	protected TransformationState removeClassState(Class<?> classBeingRedefined) {
 		return transformationStates.remove(classBeingRedefined);
 	}
-	
 }

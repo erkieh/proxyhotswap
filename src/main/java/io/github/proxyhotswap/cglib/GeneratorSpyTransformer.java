@@ -21,7 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class GeneratorSpyTransformer implements ClassFileTransformer {
 	
 	private static Map<String, GeneratorParams> generatorParams = new ConcurrentHashMap<>();
-	protected static final ClassPool classPool = ClassPool.getDefault();
+	protected static final ClassPool classPool = TransformationUtils.getClassPool();
 	
 	public byte[] transform(ClassLoader loader, String className, final Class<?> classBeingRedefined,
 			ProtectionDomain protectionDomain, final byte[] classfileBuffer) {
@@ -29,7 +29,7 @@ public class GeneratorSpyTransformer implements ClassFileTransformer {
 			return null;
 		CtClass cc;
 		try {
-			cc = classPool.makeClass(new ByteArrayInputStream(classfileBuffer));
+			cc = classPool.makeClass(new ByteArrayInputStream(classfileBuffer), false);
 			CtClass[] interfaces = cc.getInterfaces();
 			for (CtClass class1 : interfaces) {
 				// We use strings because some libraries repackage cglib to a different namespace to avoid conflicts.
@@ -38,7 +38,7 @@ public class GeneratorSpyTransformer implements ClassFileTransformer {
 					for (CtMethod method : declaredMethods) {
 						if (method.getName().equals("generate")
 								&& method.getReturnType().getSimpleName().equals("byte[]")) {
-							return addGenerationParameterCollector(classfileBuffer);
+							return addGenerationParameterCollector(cc);
 						}
 					}
 				}
@@ -52,25 +52,18 @@ public class GeneratorSpyTransformer implements ClassFileTransformer {
 	public static void register(Object generatorStrategy, Object classGenerator, byte[] bytes) {
 		CtClass cc = null;
 		try {
-			cc = classPool.makeClass(new ByteArrayInputStream(bytes));
+			cc = classPool.makeClass(new ByteArrayInputStream(bytes), false);
 			generatorParams.put(cc.getName(), new GeneratorParams(generatorStrategy, classGenerator));
 		} catch (IOException | RuntimeException e) {
 			TransformationUtils.logError(e);
-		} finally {
-			TransformationUtils.detachCtClass(cc);
 		}
 	}
 	
-	private byte[] addGenerationParameterCollector(final byte[] classfileBuffer) throws IOException, NotFoundException,
+	private byte[] addGenerationParameterCollector(final CtClass cc) throws IOException, NotFoundException,
 			CannotCompileException {
-		CtClass cc2 = classPool.makeClass(new ByteArrayInputStream(classfileBuffer));
-		try {
-			CtMethod declaredMethod = cc2.getDeclaredMethod("generate");
-			declaredMethod.insertAfter(getClass().getName() + ".register($0, $1, $_);");
-			return cc2.toBytecode();
-		} finally {
-			TransformationUtils.detachCtClass(cc2);
-		}
+		CtMethod declaredMethod = cc.getDeclaredMethod("generate");
+		declaredMethod.insertAfter(getClass().getName() + ".register($0, $1, $_);");
+		return cc.toBytecode();
 	}
 	
 	public static Map<String, GeneratorParams> getGeneratorParams() {

@@ -1,5 +1,6 @@
 package io.github.proxyhotswap;
 
+import io.github.proxyhotswap.javassist.ClassPool;
 import io.github.proxyhotswap.javassist.CtClass;
 
 /**
@@ -19,5 +20,13 @@ public class TransformationUtils {
 	
 	public static void logError(Exception e) {
 		e.printStackTrace();
+	}
+	
+	public static String getClassName(String name) {
+		return name.replaceAll("/", ".");
+	}
+	
+	public static ClassPool getClassPool() {
+		return ClassPool.getDefault();
 	}
 }
