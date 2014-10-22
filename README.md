@@ -11,7 +11,7 @@ java.lang.reflect.ProxyCglib proxy replacement is a one step process, Cglib on t
 
 ## Usage
 Configure the Java VM with the -javaagent option.
-For example if you already use DCEVM via "-XXaltjvm=dcevm" then you just need to append 
+For example if you already use DCEVM via `-XXaltjvm=dcevm` then you just need to append 
 ` -javaagent:C:\path_to_downloaded_file\java-proxy-agent-v0.0.1-alpha-3.jar`
 so it will become
 `-XXaltjvm=dcevm -javaagent:C:\path_to_downloaded_file\java-proxy-agent-v0.0.1-alpha-3.jar`
